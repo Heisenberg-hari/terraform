@@ -33,6 +33,7 @@ export default function App() {
   const [contactsLoading, setContactsLoading] = useState(false)
   const [liveMessage, setLiveMessage] = useState('')
   const [worldView, setWorldView] = useState('explorer')
+  const [isMobile, setIsMobile] = useState(false)
   const typingTimersRef = useRef({})
   const typingStopTimerRef = useRef(null)
   const typingActiveRef = useRef(false)
@@ -106,6 +107,18 @@ export default function App() {
     }
     bootstrap()
   }, [clearSession, setUser, setWorld])
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 960px), (pointer: coarse)')
+    const update = () => setIsMobile(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+
+  useEffect(() => {
+    if (isMobile) setWorldView('list')
+  }, [isMobile])
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -536,7 +549,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="panel">
+        <section className="panel world-panel">
           <h2>World Formations</h2>
           <div className="field">
             <button className="btn" type="button" onClick={() => setWorldView((prev) => (prev === 'explorer' ? 'list' : 'explorer'))}>
@@ -545,7 +558,7 @@ export default function App() {
           </div>
           {worldView === 'explorer' ? (
             <Suspense fallback={<p>Loading explorer...</p>}>
-              <WorldExplorer formations={formations} unreadCount={unreadCount} realtimeStatus={realtimeStatus} />
+              <WorldExplorer formations={formations} unreadCount={unreadCount} realtimeStatus={realtimeStatus} isMobile={isMobile} />
             </Suspense>
           ) : null}
           {worldView === 'list' ? (

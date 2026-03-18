@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { PointerLockControls, Sky } from '@react-three/drei'
+import { OrbitControls, PointerLockControls, Sky } from '@react-three/drei'
 import * as THREE from 'three'
 import { useAmbientAudio } from '../hooks/useAmbientAudio'
 import { useReducedMotion } from '../hooks/useReducedMotion'
@@ -157,7 +157,7 @@ function AtmosphereParticles({ reducedMotion }) {
   )
 }
 
-function PlayerController({ bounds = 65 }) {
+function PlayerController({ bounds = 65, isMobile = false, mobileMove = { x: 0, z: 0 } }) {
   const { camera } = useThree()
   const keys = useRef({})
 
@@ -178,7 +178,12 @@ function PlayerController({ bounds = 65 }) {
 
   useFrame((_, delta) => {
     const state = keys.current
-    const speed = state.ShiftLeft ? 20 : 11
+    const keyboardX = (state.KeyD ? 1 : 0) - (state.KeyA ? 1 : 0)
+    const keyboardZ = (state.KeyW ? 1 : 0) - (state.KeyS ? 1 : 0)
+
+    const inputX = keyboardX + Number(mobileMove.x || 0)
+    const inputZ = keyboardZ + Number(mobileMove.z || 0)
+    const speed = state.ShiftLeft ? 20 : (isMobile ? 8 : 11)
 
     const forward = new THREE.Vector3()
     camera.getWorldDirection(forward)
@@ -188,22 +193,76 @@ function PlayerController({ bounds = 65 }) {
     const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize()
     const move = new THREE.Vector3()
 
-    if (state.KeyW) move.add(forward)
-    if (state.KeyS) move.sub(forward)
-    if (state.KeyA) move.sub(right)
-    if (state.KeyD) move.add(right)
+    if (inputZ > 0) move.add(forward)
+    if (inputZ < 0) move.sub(forward)
+    if (inputX > 0) move.add(right)
+    if (inputX < 0) move.sub(right)
 
     if (move.lengthSq() > 0) {
       move.normalize().multiplyScalar(speed * delta)
       camera.position.add(move)
     }
 
-    camera.position.y = 3
+    camera.position.y = isMobile ? 4 : 3
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, -bounds, bounds)
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, -bounds, bounds)
   })
 
+  if (isMobile) return null
   return <PointerLockControls />
+}
+
+function TouchPad({ onChange }) {
+  function setDir(x, z) {
+    onChange({ x, z })
+  }
+
+  return (
+    <div className="touch-pad">
+      <button
+        type="button"
+        className="touch-btn"
+        onTouchStart={() => setDir(0, 1)}
+        onTouchEnd={() => setDir(0, 0)}
+        onMouseDown={() => setDir(0, 1)}
+        onMouseUp={() => setDir(0, 0)}
+      >
+        ?
+      </button>
+      <div className="touch-row">
+        <button
+          type="button"
+          className="touch-btn"
+          onTouchStart={() => setDir(-1, 0)}
+          onTouchEnd={() => setDir(0, 0)}
+          onMouseDown={() => setDir(-1, 0)}
+          onMouseUp={() => setDir(0, 0)}
+        >
+          ?
+        </button>
+        <button
+          type="button"
+          className="touch-btn"
+          onTouchStart={() => setDir(1, 0)}
+          onTouchEnd={() => setDir(0, 0)}
+          onMouseDown={() => setDir(1, 0)}
+          onMouseUp={() => setDir(0, 0)}
+        >
+          ?
+        </button>
+      </div>
+      <button
+        type="button"
+        className="touch-btn"
+        onTouchStart={() => setDir(0, -1)}
+        onTouchEnd={() => setDir(0, 0)}
+        onMouseDown={() => setDir(0, -1)}
+        onMouseUp={() => setDir(0, 0)}
+      >
+        ?
+      </button>
+    </div>
+  )
 }
 
 function MiniMap({ formations }) {
@@ -225,12 +284,13 @@ function MiniMap({ formations }) {
   )
 }
 
-export default function WorldExplorer({ formations, unreadCount, realtimeStatus }) {
+export default function WorldExplorer({ formations, unreadCount, realtimeStatus, isMobile = false }) {
   const [hintVisible, setHintVisible] = useState(true)
   const [mood, setMood] = useState('calm')
   const [audioEnabled, setAudioEnabled] = useState(false)
+  const [mobileMove, setMobileMove] = useState({ x: 0, z: 0 })
   const reducedMotion = useReducedMotion()
-  const cappedFormations = useMemo(() => formations.slice(0, 660), [formations])
+  const cappedFormations = useMemo(() => formations.slice(0, isMobile ? 280 : 660), [formations, isMobile])
   const sunlightRef = useRef(null)
   const { supported: audioSupported } = useAmbientAudio({ enabled: audioEnabled, mood })
 
@@ -242,7 +302,7 @@ export default function WorldExplorer({ formations, unreadCount, realtimeStatus 
 
   return (
     <div className="world-shell">
-      <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 3, 16], fov: 63 }}>
+      <Canvas shadows dpr={isMobile ? [0.8, 1.1] : [1, 1.5]} camera={{ position: [0, isMobile ? 4 : 3, isMobile ? 20 : 16], fov: isMobile ? 68 : 63 }}>
         <color attach="background" args={['#0b1f26']} />
         <fog attach="fog" args={['#0b1f26', 20, 125]} />
         <ambientLight intensity={0.45} />
@@ -260,7 +320,8 @@ export default function WorldExplorer({ formations, unreadCount, realtimeStatus 
         <AtmosphereController lightRef={sunlightRef} reducedMotion={reducedMotion} mood={mood} />
         <TerrainMesh />
         <FormationMeshes formations={cappedFormations} />
-        <PlayerController />
+        <PlayerController isMobile={isMobile} mobileMove={mobileMove} />
+        {isMobile ? <OrbitControls enablePan={false} enableZoom={true} maxPolarAngle={1.45} minDistance={8} maxDistance={34} /> : null}
       </Canvas>
 
       <div className="world-overlay">
@@ -291,9 +352,11 @@ export default function WorldExplorer({ formations, unreadCount, realtimeStatus 
 
       {hintVisible ? (
         <button className="world-hint" type="button" onClick={() => setHintVisible(false)}>
-          Click scene to lock cursor, then use WASD + Shift to explore.
+          {isMobile ? 'Use touch arrows + drag to explore on mobile.' : 'Click scene to lock cursor, then use WASD + Shift to explore.'}
         </button>
       ) : null}
+
+      {isMobile ? <TouchPad onChange={setMobileMove} /> : null}
 
       <MiniMap formations={cappedFormations} />
     </div>

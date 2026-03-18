@@ -184,6 +184,32 @@ body {
   font-size: 0.72rem;
 }
 
+.touch-pad {
+  position: absolute;
+  left: 12px;
+  right: auto;
+  bottom: 90px;
+  z-index: 4;
+  display: grid;
+  gap: 0.3rem;
+  justify-items: center;
+}
+
+.touch-row {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.touch-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #4d7683;
+  color: #e6f7fb;
+  background: rgba(11, 26, 31, 0.86);
+  font-size: 1rem;
+}
+
 .minimap {
   position: absolute;
   right: 14px;
@@ -219,15 +245,23 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .world-panel {
+    order: -1;
+  }
+
   .world-shell,
   .world-shell canvas {
-    min-height: 340px;
-    height: 340px !important;
+    min-height: 56vh;
+    height: 56vh !important;
   }
 
   .world-controls {
-    bottom: 144px;
+    bottom: 168px;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .world-panel .formations {
+    max-height: 68vh;
   }
 }
