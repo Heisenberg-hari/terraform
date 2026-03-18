@@ -8,6 +8,24 @@ function parseJsonSafe(text) {
   }
 }
 
+function toErrorMessage(payload, status) {
+  if (!payload) return `Request failed: ${status}`
+  if (typeof payload === 'string') return payload
+  if (payload.detail && typeof payload.detail === 'string') return payload.detail
+
+  // DRF serializer error shape: { field: ["msg"] }
+  if (typeof payload === 'object') {
+    const entries = Object.entries(payload)
+    if (entries.length) {
+      const [field, value] = entries[0]
+      if (Array.isArray(value) && value.length) return `${field}: ${value[0]}`
+      if (typeof value === 'string') return `${field}: ${value}`
+    }
+  }
+
+  return `Request failed: ${status}`
+}
+
 async function refreshAccessToken() {
   const refresh = localStorage.getItem('terraform_refresh_token')
   if (!refresh) return null
@@ -46,7 +64,7 @@ export async function apiFetch(path, options = {}, hasRetried = false) {
   if (!response.ok) {
     const text = await response.text()
     const payload = parseJsonSafe(text)
-    throw new Error(payload.detail || `Request failed: ${response.status}`)
+    throw new Error(toErrorMessage(payload, response.status))
   }
 
   if (response.status === 204) return null

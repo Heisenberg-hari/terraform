@@ -315,9 +315,21 @@ export default function App() {
     event.preventDefault()
     setError('')
     try {
+      if (!receiver && !receiverUsername.trim()) {
+        setError('Pick a contact or enter receiver username before sending.')
+        return
+      }
+      if (!content.trim()) {
+        setError('Message content cannot be empty.')
+        return
+      }
       const msg = await apiFetch('/api/messages/send/', {
         method: 'POST',
-        body: JSON.stringify({ receiver, receiver_username: receiverUsername, content }),
+        body: JSON.stringify({
+          receiver,
+          receiver_username: receiverUsername.trim(),
+          content: content.trim(),
+        }),
       })
       prependFormation({
         id: msg.id,
