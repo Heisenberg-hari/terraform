@@ -1,0 +1,2 @@
+
+{"timestamp": "2026-03-18T04:45:48.429738+00:00", "level": "ERROR", "service": "frontend", "module": "frontend", "function": "window.error", "error_type": "TestError", "message": "Synthetic validation error", "user_id": "", "request_id": "", "stack_trace": "trace"}

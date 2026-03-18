@@ -1,0 +1,7 @@
+:root {
+  --tf-text: #d8edf3;
+  --tf-panel: rgba(19, 36, 42, 0.72);
+  --tf-border: #2f4f59;
+  --tf-transition-fast: 150ms;
+  --tf-transition-slow: 500ms;
+}

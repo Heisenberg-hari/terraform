@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: terraform_db
+      POSTGRES_USER: terraform
+      POSTGRES_PASSWORD: secret
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    command: sh -c "python manage.py migrate && python -m daphne -b 0.0.0.0 -p 8000 terraform_project.asgi:application"
+    env_file:
+      - ../.env.example
+    volumes:
+      - ../backend:/app
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ../frontend:/app
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

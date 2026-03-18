@@ -1,0 +1,233 @@
+:root {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--tf-text);
+  background: radial-gradient(circle at top left, #1f454f 0%, #0e1e24 40%, #071116 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  color: var(--tf-text);
+}
+
+.hero {
+  padding: 2rem 1.2rem 1rem;
+  text-align: center;
+  animation: riseIn var(--tf-transition-slow) ease-out;
+}
+
+.hero h1 {
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 320px 1fr;
+  padding: 0 1rem 1rem;
+}
+
+.panel {
+  background: var(--tf-panel);
+  border: 1px solid var(--tf-border);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  padding: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.7rem;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #3c5963;
+  background: #0f1b20;
+  color: #d8edf3;
+}
+
+.field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.btn {
+  border: 1px solid #3c6f7e;
+  background: linear-gradient(120deg, #2d6f82, #35774d);
+  color: #ecfafd;
+  padding: 0.65rem 0.95rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform var(--tf-transition-fast), opacity var(--tf-transition-fast);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.formations {
+  max-height: 60vh;
+  overflow: auto;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.card {
+  background: rgba(9, 19, 23, 0.9);
+  border: 1px solid #28414a;
+  border-radius: 12px;
+  padding: 0.85rem;
+  animation: fadeIn var(--tf-transition-fast) ease;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: #9fc0c8;
+}
+
+.footer {
+  padding: 0.8rem 1rem 1.2rem;
+  color: #8bb4bf;
+  text-align: center;
+  font-size: 0.84rem;
+}
+
+.world-shell {
+  position: relative;
+  border: 1px solid #2f5966;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 460px;
+  background: radial-gradient(circle at 20% 10%, #173440, #0d1d24 55%, #081218);
+}
+
+.world-shell canvas {
+  display: block;
+  width: 100% !important;
+  height: 460px !important;
+}
+
+.world-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  z-index: 3;
+}
+
+.world-chip {
+  padding: 0.34rem 0.52rem;
+  border: 1px solid #396271;
+  border-radius: 999px;
+  background: rgba(7, 18, 22, 0.72);
+  color: #bce6ee;
+  font-size: 0.73rem;
+}
+
+.world-hint {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 3;
+  border: 1px solid #4d7683;
+  border-radius: 9px;
+  padding: 0.4rem 0.56rem;
+  max-width: 270px;
+  font-size: 0.72rem;
+  color: #e7f5f9;
+  background: rgba(13, 27, 33, 0.82);
+  cursor: pointer;
+}
+
+.world-controls {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 3;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.world-mini-btn {
+  padding: 0.38rem 0.58rem;
+  font-size: 0.72rem;
+}
+
+.minimap {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 126px;
+  height: 126px;
+  border: 1px solid #3e6572;
+  border-radius: 12px;
+  background: rgba(4, 13, 17, 0.75);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.minimap-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to right, rgba(145, 195, 210, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(145, 195, 210, 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.minimap-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 5px currentColor;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .world-shell,
+  .world-shell canvas {
+    min-height: 340px;
+    height: 340px !important;
+  }
+
+  .world-controls {
+    bottom: 144px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
